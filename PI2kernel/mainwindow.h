@@ -3,20 +3,19 @@
 
 #include <QMainWindow>
 
-namespace Ui {
-class MainWindow;
-}
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+    Q_DISABLE_COPY(MainWindow)
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    virtual ~MainWindow();
 
-private:
-    Ui::MainWindow *ui;
+protected:
+    void buildInterface();
+    void showMenu();
 };
 
 #endif // MAINWINDOW_H
