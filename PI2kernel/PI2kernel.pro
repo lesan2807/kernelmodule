@@ -26,13 +26,15 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+        functiongraphview.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h\
+        functiongraphview.h
 
 FORMS += \
-        mainwindow.ui
+        functiongraphview.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

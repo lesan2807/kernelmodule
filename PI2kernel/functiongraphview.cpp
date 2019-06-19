@@ -8,6 +8,11 @@ functiongraphview::functiongraphview(QWidget *parent) :
     ui(new Ui::functiongraphview)
 {
     this->ui->setupUi(this);
+    this->ui->range2d->setPlaceholderText("Rango");
+    this->ui->range3d->setPlaceholderText("Rango");
+    this->ui->funcion2d->setPlaceholderText("Funcion de una variable");
+    this->ui->funcion3d->setPlaceholderText("Funcion de dos variables");
+
     this->connect( ui->pushButton2d, &QRadioButton::clicked, this, &functiongraphview::clickedButton2d);
     this->connect( ui->pushButton3d, &QRadioButton::clicked, this, &functiongraphview::clickedButton3d);
 }

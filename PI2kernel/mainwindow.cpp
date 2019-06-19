@@ -16,7 +16,7 @@ void MainWindow::buildInterface()
     this->setWindowTitle("Graficador de funciones");
 
 #if ! defined(Q_OS_ANDROID) && ! defined(Q_OS_IOS)
-  this->resize(320, 480);
+  this->resize(500, 200);
 #endif
 }
 
