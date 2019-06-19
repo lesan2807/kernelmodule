@@ -23,8 +23,9 @@ void MainWindow::buildInterface()
 void MainWindow::showMenu()
 {
     functiongraphview* graphFuncionView = new functiongraphview(this);
-    this->setCentralWidget( graphFuncionView );
+    graphFuncionView->setLayout(graphFuncionView->ui->verticalLayout);
 
+    this->setCentralWidget( graphFuncionView );
 }
 
 MainWindow::~MainWindow()

@@ -14,8 +14,6 @@ class functiongraphview : public QWidget
 public:
     explicit functiongraphview(QWidget *parent = nullptr);
     virtual ~functiongraphview();
-
-private:
     Ui::functiongraphview *ui = nullptr;
 
 private slots:
