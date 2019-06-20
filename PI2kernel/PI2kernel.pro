@@ -24,14 +24,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
+LIBS += \
+    -lboost_iostreams \
+    -lboost_system \
+     -lboost_filesystem
+
+
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-        functiongraphview.cpp
+        functiongraphview.cpp \
+        gnuplot.cpp
 
 HEADERS += \
         mainwindow.h\
-        functiongraphview.h
+        functiongraphview.h \
+        gnuplot.h\
+        gnuplot-iostream.h
 
 FORMS += \
         functiongraphview.ui
