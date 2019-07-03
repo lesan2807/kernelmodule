@@ -34,13 +34,15 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         functiongraphview.cpp \
-        gnuplot.cpp
+    usertokernel.cpp \
+    gnuplot.cpp
 
 HEADERS += \
         mainwindow.h\
         functiongraphview.h \
-        gnuplot.h\
-        gnuplot-iostream.h
+        gnuplot-iostream.h \
+    usertokernel.h \
+    gnuplot.h
 
 FORMS += \
         functiongraphview.ui

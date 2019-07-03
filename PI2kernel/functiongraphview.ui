@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>413</width>
-    <height>317</height>
+    <width>424</width>
+    <height>320</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -69,12 +69,28 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
+        <property name="placeholderText">
+         <string>Funcion de una variable</string>
+        </property>
        </widget>
       </item>
       <item>
        <widget class="QLineEdit" name="range2d">
         <property name="enabled">
          <bool>false</bool>
+        </property>
+        <property name="placeholderText">
+         <string>Rango</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="incremento2d">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="placeholderText">
+         <string>Incremento</string>
         </property>
        </widget>
       </item>
@@ -136,12 +152,42 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
+        <property name="placeholderText">
+         <string>Funcion de dos variables</string>
+        </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="range3d">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLineEdit" name="range3dx">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="placeholderText">
+           <string>Rango de x</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="range3dy">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="placeholderText">
+           <string>Rango de y</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="incremento3d">
         <property name="enabled">
          <bool>false</bool>
+        </property>
+        <property name="placeholderText">
+         <string>Incremento</string>
         </property>
        </widget>
       </item>

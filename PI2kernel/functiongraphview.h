@@ -1,7 +1,6 @@
 #ifndef FUNCTIONGRAPHVIEW_H
 #define FUNCTIONGRAPHVIEW_H
 
-#include "gnuplot.h"
 
 #include <QWidget>
 
@@ -17,8 +16,13 @@ public:
     explicit functiongraphview(QWidget *parent = nullptr);
     virtual ~functiongraphview();
     Ui::functiongraphview *ui = nullptr;
-    gnuplot* plot = nullptr;
 
+    int userToKernel(const char* messageToSend);
+
+    //void graph2d(pointsy, rangex)
+    //void graph3d(pointsz, rangex, rangey)
+    //double* getRange2d(qstring range) ; graph gnuplot
+    //double* getRange3d(qstring rangex, qstring rangey) ; graph gnuplot
 
 private slots:
     void clickedButton2d();
