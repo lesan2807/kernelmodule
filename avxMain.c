@@ -1,12 +1,14 @@
-
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 int main(int argc, char const *argv[])
 {
 	/* code */
-	char funcion[] = {"[234,235] [4000,4001] [51001,51002]/x*x+1/0.01/2D"};
-	extern void calcularPuntos(char*, double, size_t, char*); 
-	calcularPuntos("0,1,0,0,0,0,0,0,0,0,0,0,3x*xx*+,0.01,2", 0.01, strlen(funcion), funcion); 
+	double* points = (double*)calloc(100, sizeof(double)); 
+	char funcion[] = {"[0,1] [2,3] [4,5],x*x+x/300-22,2D,0.1"};
+	extern void calcularPuntos(char*, double*, double, size_t, char*); 
+	calcularPuntos("0,1,2,3,4,5,0,0,0,0,0,0,2,x,x,*,x,300,/,+,22,-", points, 0.1, strlen(funcion), funcion); 
 	
 	return 0;
 }

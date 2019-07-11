@@ -5,7 +5,17 @@ section .data
 rangoX dq 0, 0, 0, 0, 0, 0
 rangoY dq 0, 0, 0, 0, 0, 0
 
+pointsX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
+pointsY dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  
+
+result dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 
+
+begin dq 0.0
+end dq 0.0
+
+operand2 dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+operand1 dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
 section .bss
 
@@ -16,12 +26,13 @@ section .text
 
 ; parametros 
 ; rango, funcion, incremento, 2d o 3d 
-; calcularPuntos(char* informacion, double* puntos, int sizeOfMessage, char* message) 
-; info db "a,b,c,d,e,f,a2,b2,c2,d2,e2,f2, funcion , incremento, tipo"
+; calcularPuntos(char* informacion, double* puntos, double incremento ,int sizeOfMessage, char* message) 
+; info db "a,b,c,d,e,f,a2,b2,c2,d2,e2,f2, tipo, funcion"
 ; rdi - informacion
 ; rsi - puntos 
-; rdx - sizeOfMessage
-; rcx - message 
+; rdx - incremento 
+; rcx - sizeOfMessage
+; r8 - message 
 
  
 
@@ -99,16 +110,48 @@ saveNumberRangeY:
 	jmp testForRangoY
 
 
+calcular2d:
+	xor rbx, rbx 
+	xor r13, r13 
+	jmp testForRangoXi
+
+forRangoXi:
+	mov r13, qword[rangoX+(rbx*8)]
+	mov qword[begin], r13 
+	mov r13, qword[rangoX+(rbx*8)+8]
+	mov qword[end], r13 
+
+
+	add rbx, 2 
+	jmp testForRangoXi
+
 testForRangoX:
 	cmp rbx, 6 
 	jl forRangoX 
 
-	mov rbx, 0
-	jmp testForRangoY 
+	mov rbx, 0 
 
 testForRangoY:
 	cmp rbx, 6 
 	jl forRangoY	
+
+	mov rbx, 0 
+
+testIf2dOr3d:
+	cmp byte[r12], 50
+	je calcular2d 
+
+	cmp byte[r12], 51 
+	je calcular3d 
+
+testForRangoXi: 
+	cmp rbx, 6 
+	jl forRangoXi
+	jmp fin
+
+calcular3d:
+
+
 	
 fin:
 
