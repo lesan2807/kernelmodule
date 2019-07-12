@@ -21,6 +21,10 @@ end dq 0.0
 operand2 dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 operand1 dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
+sinX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+cosX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+lnX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
 
 section .bss
 
@@ -204,24 +208,73 @@ checkIfTokenX:
 	jmp checkIfTokenX
 
 itIsAnX:
-	jmp checkWhatToDo 
+	mov r15, 7 
+forPushOperator:	
+	cmp r15, -1 
+	je endOfShuntingYard 
+	push qword[pointsX+r15*8]
+	dec r15	
+	jmp forPushOperator
 
 itIsSinX: 
-	jmp checkWhatToDo
+	mov r15, 7
+forCalculateSinX:
+	cmp r15, -1 
+	je endOfShuntingYard 
+	fld qword[pointsX+r15*8]
+	fsin 	
+	fstp qword[sinX+r15*8]
+	push qword[sinX+r15*8]
+	dec r15 
+	jmp forCalculateSinX
+
 itIsCosX: 
-	jmp checkWhatToDo
+	mov r15, 7
+forCalculateCosX:
+	cmp r15, -1 
+	je endOfShuntingYard 
+	fld qword[pointsX+r15*8]
+	fcos 	
+	fstp qword[cosX+r15*8]
+	push qword[cosX+r15*8]
+	dec r15 
+	jmp forCalculateCosX
+
 itIsLnX: 
+	mov r15, 7
+forCalculateLnX:
+	cmp r15, -1 
+	je endOfShuntingYard 
+	
+	fld1
+	fldl2e  
+	fdivp st1, st0 ; 1/log2(e) 
+	
+	fld qword[pointsX+r15*8]
+	fyl2x
+	
+	fstp qword[ln+r15*8]
+	push qword[ln+r15*8]
+	dec r15 
+	jmp forCalculatelnX
+
+itIsSum:
+	
+
 	jmp checkWhatToDo
-itIsSum: 
-	jmp checkWhatToDo
+
 itIsResta: 
 	jmp checkWhatToDo
+
 itIsMul: 
 	jmp checkWhatToDo
+
 itIsDiv: 
 	jmp checkWhatToDo
+
 broadcastNum: 
 	jmp checkWhatToDo
+
 checkWhatToDo:
 	; switch gigante de si es operador o si es operando
 
@@ -251,23 +304,7 @@ checkWhatToDo:
 
 	;else it is a number 
 	getNumber: 
-	xor r15, r15 
-	mov r15, charToken
-	cmp byte [charToken], '0'
-    jb broadcastNum
-    cmp byte [charToken], '9'
-    ja broadcastNum 
-    shl r13,1
-    mov r14, r13
-    shl r13,2
-    add r14, r13
-    mov r13, r14
-    xor r14, r14
-    mov r14b, byte [r12]
-    and r14b, 0x0F
-    add r13, r14
-    inc r12
-    jmp getNumberX
+	
 
 endOfShuntingYard:
 	cmp r12, 0 
