@@ -30,7 +30,7 @@ section .text
 ; info db "a,b,c,d,e,f,a2,b2,c2,d2,e2,f2, tipo, funcion"
 ; rdi - informacion
 ; rsi - puntos 
-; rdx - incremento 
+; xmm0 - incremento 
 ; rcx - sizeOfMessage
 ; r8 - message 
 
@@ -113,6 +113,8 @@ saveNumberRangeY:
 calcular2d:
 	xor rbx, rbx 
 	xor r13, r13 
+	xorpd xmm1, xmm1
+	xorpd xmm2, xmm2
 	jmp testForRangoXi
 
 forRangoXi:
@@ -121,6 +123,33 @@ forRangoXi:
 	mov r13, qword[rangoX+(rbx*8)+8]
 	mov qword[end], r13 
 
+	cvtsi2sd xmm1, [begin]
+	cvtsi2sd xmm2, [end]
+
+	jmp conditionWhileBeginEndX 
+
+whileBeginEndX: 
+	xor r13, r13 
+	jmp testForFill8X 
+forFill8X:
+	ucomisd xmm1, xmm2 	
+	jae putCero 
+
+	movsd qword[pointsX+(r13*8)], xmm1 
+	addsd xmm1, xmm0 
+	jmp  finForFill8X
+
+putCero:
+	xorpd xmm3, xmm3
+	movsd qword[pointsX+(r13*8)], xmm3
+
+finForFill8X:
+	inc r13
+	jmp testForFill8X
+
+conditionWhileBeginEndX:
+	ucomisd xmm1, xmm2 
+	jb whileBeginEndX
 
 	add rbx, 2 
 	jmp testForRangoXi
@@ -148,6 +177,11 @@ testForRangoXi:
 	cmp rbx, 6 
 	jl forRangoXi
 	jmp fin
+
+testForFill8X:
+	cmp r13, 8 
+	jl forFill8X 
+	jmp conditionWhileBeginEndX
 
 calcular3d:
 
