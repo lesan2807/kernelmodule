@@ -13,7 +13,9 @@ pointsX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
 pointsY dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  
 
-result dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 
+result dq 0.0, 0.0, 0.0, 0.0
+
+resultX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
 begin dq 0.0
 end dq 0.0
@@ -25,6 +27,7 @@ sinX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 cosX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 lnX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
+number dq 0 
 
 section .bss
 
@@ -121,7 +124,7 @@ saveNumberRangeY:
 calcular3d:
 
 calcular2d:
-	inc r12 
+	add r12, 2 
 	xor rbx, rbx 
 	xor r13, r13 
 	xorpd xmm1, xmm1
@@ -198,13 +201,13 @@ shuntingYardX:
 	xor r15, r15 ; contador del token 
 	xor r14, r14 
 	; for each token 
-checkIfTokenX: 
-	inc r12 
+checkIfTokenX:  
 	cmp byte[r12], 44
 	je checkWhatToDo
 	mov r14b, byte[r12] 
 	mov [charToken+r15], r14b
 	inc r15
+	inc r12 
 	jmp checkIfTokenX
 
 itIsAnX:
@@ -253,27 +256,203 @@ forCalculateLnX:
 	fld qword[pointsX+r15*8]
 	fyl2x
 	
-	fstp qword[ln+r15*8]
-	push qword[ln+r15*8]
+	fstp qword[lnX+r15*8]
+	push qword[lnX+r15*8]
 	dec r15 
-	jmp forCalculatelnX
+	jmp forCalculateLnX
 
 itIsSum:
-	
+	xor r15, r15 
+forPopOperator2Sum: 
+	cmp r15, 8 
+	jge beginForPopOperator1Sum	
+	pop qword[operand2+r15*8]
+	inc r15 
+	jmp forPopOperator2Sum
 
-	jmp checkWhatToDo
+beginForPopOperator1Sum: 
+	xor r15, r15
+forPopOperator1Sum:
+	cmp r15, 8 
+	jge calculateSum 	
+	pop qword[operand1+r15*8]
+	inc r15 
+	jmp forPopOperator1Sum
+
+calculateSum:
+	vmovupd ymm7, [operand1]
+	vmovupd ymm6, [operand2] 
+
+	vaddpd ymm5, ymm7, ymm6 
+	vmovupd [result], ymm5
+
+	mov r15, 3 
+pushResultSum: 
+	cmp r15, -1
+	je calculateSum4
+	push qword[result+r15*8]
+	inc r15 
+	jmp pushResultSum
+
+calculateSum4: 
+	vmovupd ymm7, [operand1+32]
+	vmovupd ymm6, [operand2+32]
+	vaddpd ymm5, ymm7, ymm6 
+	vmovupd [result], ymm5 
+	mov r15, 3  
+pushResult4Sum: 
+	cmp r15, -1 
+	je endOfShuntingYard	
+	push qword[result+r15*8]
+	inc r15 
+	jmp pushResult4Sum 
 
 itIsResta: 
-	jmp checkWhatToDo
+	xor r15, r15 
+forPopOperator2Resta: 
+	cmp r15, 8 
+	jge beginForPopOperator1Resta
+	pop qword[operand2+r15*8]
+	inc r15 
+	jmp forPopOperator2Resta
 
-itIsMul: 
-	jmp checkWhatToDo
+beginForPopOperator1Resta: 
+	xor r15, r15
+forPopOperator1Resta:
+	cmp r15, 8 
+	jge calculateResta 	
+	pop qword[operand1+r15*8]
+	inc r15 
+	jmp forPopOperator1Resta
+
+calculateResta:
+	vmovupd ymm7, [operand1]
+	vmovupd ymm6, [operand2] 
+
+	vsubpd ymm5, ymm6, ymm7 
+	vmovupd [result], ymm5
+
+	mov r15, 3 
+pushResultResta: 
+	cmp r15, -1
+	je calculateResta4
+	push qword[result+r15*8]
+	inc r15 
+	jmp pushResultResta
+
+calculateResta4: 
+	vmovupd ymm7, [operand1+32]
+	vmovupd ymm6, [operand2+32]
+	vsubpd ymm5, ymm6, ymm7 
+	vmovupd [result], ymm5 
+	mov r15, 3  
+pushResult4Resta: 
+	cmp r15, -1 
+	je endOfShuntingYard	
+	push qword[result+r15*8]
+	inc r15 
+	jmp pushResult4Resta 
+
+itIsMul:
+	xor r15, r15 
+forPopOperator2Mul: 
+	cmp r15, 8 
+	jge beginForPopOperator1Mul	
+	pop qword[operand2+r15*8]
+	inc r15 
+	jmp forPopOperator2Mul
+
+beginForPopOperator1Mul: 
+	xor r15, r15
+forPopOperator1Mul:
+	cmp r15, 8 
+	jge calculateMul 	
+	pop qword[operand1+r15*8]
+	inc r15 
+	jmp forPopOperator1Mul
+
+calculateMul:
+	vmovupd ymm7, [operand1]
+	vmovupd ymm6, [operand2] 
+
+	vmulpd ymm5, ymm7, ymm6 
+	vmovupd [result], ymm5
+
+	mov r15, 3 
+pushResultMul: 
+	cmp r15, -1
+	je calculateMul4
+	push qword[result+r15*8]
+	inc r15 
+	jmp pushResultMul
+
+calculateMul4: 
+	vmovupd ymm7, [operand1+32]
+	vmovupd ymm6, [operand2+32]
+	vmulpd ymm5, ymm7, ymm6 
+	vmovupd [result], ymm5 
+	mov r15, 3  
+pushResult4Mul: 
+	cmp r15, -1 
+	je endOfShuntingYard	
+	push qword[result+r15*8]
+	inc r15 
+	jmp pushResult4Mul 
 
 itIsDiv: 
-	jmp checkWhatToDo
+	xor r15, r15 
+forPopOperator2Div: 
+	cmp r15, 8 
+	jge beginForPopOperator1Div
+	pop qword[operand2+r15*8]
+	inc r15 
+	jmp forPopOperator2Div
+
+beginForPopOperator1Div: 
+	xor r15, r15
+forPopOperator1Div:
+	cmp r15, 8 
+	jge calculateDiv	
+	pop qword[operand1+r15*8]
+	inc r15 
+	jmp forPopOperator1Div
+
+calculateDiv:
+	vmovupd ymm6, [operand1]
+	vmovupd ymm7, [operand2] 
+
+	vdivpd ymm5, ymm7, ymm6 
+	vmovupd [result], ymm5
+
+	mov r15, 3 
+pushResultDiv: 
+	cmp r15, -1
+	je calculateDiv4
+	push qword[result+r15*8]
+	inc r15 
+	jmp pushResultDiv
+
+calculateDiv4: 
+	vmovupd ymm6, [operand1+32]
+	vmovupd ymm7, [operand2+32]
+	vdivpd ymm5, ymm7, ymm6 
+	vmovupd [result], ymm5 
+	mov r15, 3  
+pushResult4Div: 
+	cmp r15, -1 
+	je endOfShuntingYard	
+	push qword[result+r15*8]
+	inc r15 
+	jmp pushResult4Div 
 
 broadcastNum: 
-	jmp checkWhatToDo
+	mov r15, 7 
+forBroadcast:
+	cmp r15, -1 
+	je endOfShuntingYard
+	push qword[number]
+	dec r15 
+	jmp forBroadcast
 
 checkWhatToDo:
 	; switch gigante de si es operador o si es operando
@@ -304,16 +483,38 @@ checkWhatToDo:
 
 	;else it is a number 
 	getNumber: 
-	
+		cmp byte [charToken], '0'
+	    jb broadcastNum
+	    cmp byte [charToken], '9'
+	    ja broadcastNum
+	    shl r13,1
+	    mov r14, r13
+	    shl r13,2
+	    add r14, r13
+	    mov r13, r14
+	    xor r14, r14
+	    mov r14b, byte [charToken]
+	    and r14b, 0x0F
+	    add r13, r14
+	    mov qword[number], r13 
+	    inc byte[charToken]
+	    jmp getNumberX
 
 endOfShuntingYard:
-	cmp r12, 0 
+	inc r12 
+	cmp byte[r12], 0
 	jne shuntingYardX
 
+	xor r15, r15 
+forPopResult: 
+	cmp r15, 8 
+	jge conditionWhileBeginEndX	
+	pop qword[resultX+r15*8]
+	inc r15 
+	jmp forPopResult
 
 	; pop a result el resultado esto es un for 
 	; append a los puntos para que estos se los devuelva a VFunctionDev
-	jmp conditionWhileBeginEndX
 	
 fin:
 
