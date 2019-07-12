@@ -2,6 +2,10 @@ global calcularPuntos
 
 section .data
 
+
+
+charToken: db "     " , 0 
+
 rangoX dq 0, 0, 0, 0, 0, 0
 rangoY dq 0, 0, 0, 0, 0, 0
 
@@ -16,6 +20,7 @@ end dq 0.0
 
 operand2 dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 operand1 dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
 
 section .bss
 
@@ -109,8 +114,10 @@ saveNumberRangeY:
 	inc rbx
 	jmp testForRangoY
 
+calcular3d:
 
 calcular2d:
+	inc r12 
 	xor rbx, rbx 
 	xor r13, r13 
 	xorpd xmm1, xmm1
@@ -131,6 +138,7 @@ forRangoXi:
 whileBeginEndX: 
 	xor r13, r13 
 	jmp testForFill8X 
+
 forFill8X:
 	ucomisd xmm1, xmm2 	
 	jae putCero 
@@ -181,11 +189,94 @@ testForRangoXi:
 testForFill8X:
 	cmp r13, 8 
 	jl forFill8X 
+
+shuntingYardX: 
+	xor r15, r15 ; contador del token 
+	xor r14, r14 
+	; for each token 
+checkIfTokenX: 
+	inc r12 
+	cmp byte[r12], 44
+	je checkWhatToDo
+	mov r14b, byte[r12] 
+	mov [charToken+r15], r14b
+	inc r15
+	jmp checkIfTokenX
+
+itIsAnX:
+	jmp checkWhatToDo 
+
+itIsSinX: 
+	jmp checkWhatToDo
+itIsCosX: 
+	jmp checkWhatToDo
+itIsLnX: 
+	jmp checkWhatToDo
+itIsSum: 
+	jmp checkWhatToDo
+itIsResta: 
+	jmp checkWhatToDo
+itIsMul: 
+	jmp checkWhatToDo
+itIsDiv: 
+	jmp checkWhatToDo
+broadcastNum: 
+	jmp checkWhatToDo
+checkWhatToDo:
+	; switch gigante de si es operador o si es operando
+
+	cmp byte[charToken], 'x'
+	je itIsAnX
+
+	cmp byte[charToken], 's'
+	je itIsSinX
+
+	cmp byte[charToken], 'c'
+	je itIsCosX
+
+	cmp byte[charToken], 'l'
+	je itIsLnX
+
+	cmp byte[charToken], '+'
+	je itIsSum
+	
+	cmp byte[charToken], '-'
+	je itIsResta
+
+	cmp byte[charToken], '*'
+	je itIsMul 
+
+	cmp byte[charToken], '/'
+	je itIsDiv 
+
+	;else it is a number 
+	getNumber: 
+	xor r15, r15 
+	mov r15, charToken
+	cmp byte [charToken], '0'
+    jb broadcastNum
+    cmp byte [charToken], '9'
+    ja broadcastNum 
+    shl r13,1
+    mov r14, r13
+    shl r13,2
+    add r14, r13
+    mov r13, r14
+    xor r14, r14
+    mov r14b, byte [r12]
+    and r14b, 0x0F
+    add r13, r14
+    inc r12
+    jmp getNumberX
+
+endOfShuntingYard:
+	cmp r12, 0 
+	jne shuntingYardX
+
+
+	; pop a result el resultado esto es un for 
+	; append a los puntos para que estos se los devuelva a VFunctionDev
 	jmp conditionWhileBeginEndX
-
-calcular3d:
-
-
 	
 fin:
 
