@@ -78,16 +78,67 @@ global calcularPuntos
 
 %endmacro
 
+%macro calcular 8 
+	
+	; for i = 0; i < 6; i +=2 
+	xor rbx, rbx 
+	xor r13, r13 
+	xorpd xmm1, xmm1
+	xorpd xmm2, xmm2
+
+	%%forRango: 
+		mov r13, qword[%5 + (rbx*8)] ;beginX
+		mov qword[%1], r13
+		mov r13, qword[%5 + (rbx*8)+8] ;endX 
+		mov qword[%2], r13 
+		
+		mov r13, qword[%6 + (rbx*8)] ;beginY 
+		mov qword[%3], r13 
+		mov r13, qword[%6 + (rbx*8)+8] ;endY 
+		mov qword[%4], r13  
+
+		whileBeginEnd %1, %2, %3, %4, %7, %8, pointsX, pointsY  
+
+		add rbx, 2  
+		cmp rbx, 6 
+		jl %%forRango
+
+%endmacro
+
+%macro whileBeginEnd 8 
+	
+	
+	
+%endmacro
+
 section .data
 
 rangoX dq 0, 0, 0, 0, 0, 0
 rangoY dq 0, 0, 0, 0, 0, 0
 
+beginX dq 0 
+endX dq 0 
+
+beginY dq 0 
+endY dq 0 
+
+pointsX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+pointsY dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  
+
 section .text
+
+; calcularPuntos(char* informacion, double* puntos, double incremento ,int sizeOfMessage, char* message) 
+; info db "a,b,c,d,e,f,a2,b2,c2,d2,e2,f2, tipo, funcion"
+; rdi - informacion
+; rsi - puntos 
+; xmm0 - incremento 
+; rcx - sizeOfMessage
+; r8 - message 
 
 calcularPuntos:
 	pushPila
 	forGetRangos rangoX, rangoY 
 	
+	calcular beginX, endX, beginY, endY, rangoX, rangoY, r12, xmm0	 			
 
 	popPila
