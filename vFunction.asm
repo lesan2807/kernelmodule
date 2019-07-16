@@ -131,6 +131,9 @@ global calcularPuntos
 	cvtsi2sd xmm1, [%1]
 	cvtsi2sd xmm2, [%2]
 
+	cvtsi2sd xmm3, [%3]
+	cvtsi2sd xmm4, [%4] 
+
 	%%whileBeginEnd: 	
 		
 		forFillPoints %1, %2, %3, %4, %6, %7, %8  
@@ -143,10 +146,10 @@ global calcularPuntos
 %endmacro
 
 
-; %1 beginX
-; %2 endX
-; %3 beginY
-; %4 endY 
+; %1 beginX xmm1 
+; %2 endX xmm2 
+; %3 beginY xmm3 
+; %4 endY xmm4 
 ; %5 xmm0 ; el incremento
 ; %6 pointsX
 ; %7 pointsY
@@ -169,11 +172,27 @@ global calcularPuntos
 			addsd xmm1, xmm0 
 
 			%%putCeroX: 
-				xorpd xmm3, xmm3
-				movsd qword[%6+(r13*8)], xmm3
+				xorpd xmm6, xmm6
+				movsd qword[%6+(r13*8)], xmm6
 				jmp %%finForFill8 	
 
-			%%fillYandX: 	
+		%%fillYandX: 
+			ucomisd xmm1, xmm2 
+			jae %%putCeroXandY 
+			ucomisd xmm3, xmm4 
+			jae %%putCeroXandY 
+
+			movsd qword[%6+(r13*8)], xmm1
+			movsd qword[%7+(r13*8)], xmm3 
+
+			addsd xmm1, xmm0 
+			addsd xmm3, xmm0  			
+
+			%%putCeroXandY: 
+				xorpd xmm6, xmm6 
+				xorpd xmm7, xmm7 
+				movsd qword[%6+(r13*8)], xmm6
+				movsd qword[%7+(r13*8)], xmm7 
 	
 	%%finForFill8: 
 		inc r13 	
