@@ -1,5 +1,7 @@
 global calcularPuntos 
 
+; %1 label where to jump 
+; %2 register o mem that contains the number in char that we want to convert to int 
 %macro getNumberFromString 2
 	%%getNumber: 
 		cmp byte [%2], '0'
@@ -12,7 +14,7 @@ global calcularPuntos
 	    add r14, r13
 	    mov r13, r14
 	    xor r14, r14
-	    mov r14b, byte [r12]
+	    mov r14b, byte [%2]
 	    and r14b, 0x0F
 	    add r13, r14
 	    inc r12
@@ -43,6 +45,8 @@ global calcularPuntos
 	ret	
 %endmacro
 
+; %1 rangoX
+; %2 rangoY
 %macro forGetRangos 2 
 	mov rbx, 0 ; i 
 	mov r12, rdi 
@@ -78,6 +82,14 @@ global calcularPuntos
 
 %endmacro
 
+; %1 beginX
+; %2 endX
+; %3 beginY
+; %4 endY 
+; %5 rangoX 
+; %6 rangoY
+; %7 r12 ; donde está la funcion
+; %8 xmm0 ; el incremento
 %macro calcular 8 
 	
 	; for i = 0; i < 6; i +=2 
@@ -97,6 +109,7 @@ global calcularPuntos
 		mov r13, qword[%6 + (rbx*8)+8] ;endY 
 		mov qword[%4], r13  
 
+		
 		whileBeginEnd %1, %2, %3, %4, %7, %8, pointsX, pointsY  
 
 		add rbx, 2  
@@ -105,10 +118,69 @@ global calcularPuntos
 
 %endmacro
 
+; %1 beginX
+; %2 endX
+; %3 beginY
+; %4 endY 
+; %5 r12 ; donde está la función  
+; %6 xmm0 ; el incremento
+; %7 pointsX
+; %8 pointsY
 %macro whileBeginEnd 8 
 	
+	cvtsi2sd xmm1, [%1]
+	cvtsi2sd xmm2, [%2]
+
+	%%whileBeginEnd: 	
+		
+		forFillPoints %1, %2, %3, %4, %6, %7, %8  
+		; shuntingYard %5, %7, %8, operand1, operand2, result 
+
+		ucomisd xmm1, xmm2
+		jb %%whileBeginEnd
 	
+
+%endmacro
+
+
+; %1 beginX
+; %2 endX
+; %3 beginY
+; %4 endY 
+; %5 xmm0 ; el incremento
+; %6 pointsX
+; %7 pointsY
+%macro forFillPoints 7 
 	
+	; for j = 0; j < 8; ++j 
+	xor r13, r13 
+
+	%%forFill8:
+		%%fillX: 
+			cmp qword[%3], 0
+			jne %%fillYandX
+			cmp qword[%4], 0 
+			jne %%fillYandX
+
+			ucomisd xmm1, xmm2 	
+			jae %%putCeroX 
+
+			movsd qword[%6+(r13*8)], xmm1 
+			addsd xmm1, xmm0 
+
+			%%putCeroX: 
+				xorpd xmm3, xmm3
+				movsd qword[%6+(r13*8)], xmm3
+				jmp %%finForFill8 	
+
+			%%fillYandX: 	
+	
+	%%finForFill8: 
+		inc r13 	
+		cmp r13, 8  
+		jl %%forFill8  
+
+
 %endmacro
 
 section .data
