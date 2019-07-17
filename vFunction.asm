@@ -219,12 +219,13 @@ global calcularPuntos
 ; %6 result
 %macro shuntingYard 6
 	
+
 	%%shuntingYardBegin:
 		xor r15, r15 	
 		xor r14, r14 
-
+		push r12 
 	; for each token 
-	%%checkIfToken:  
+ 
 		; limpiar el token 
 
 	%%cleanToken:
@@ -234,6 +235,7 @@ global calcularPuntos
 		jl %%cleanToken 	
 
 		xor r14, r14 
+	%%checkIfToken: 
 		cmp byte[%1], ','
 		je %%checkWhatToDo
 		mov r14b, byte[%1] 
@@ -275,7 +277,8 @@ global calcularPuntos
 		xor r13, r13	
 		getNumberFromStringMem %%broadcastNum, charToken
 		%%broadcastNum: 
-			mov qword[number], r13 
+			cvtsi2sd xmm4, r13
+			movsd qword[number], xmm4  
 			pushNumberToStack number
 		jmp %%endOfShuntingYard
 
@@ -283,8 +286,8 @@ global calcularPuntos
 		popOperandFromStack operand2 
 		popOperandFromStack operand1 
 
-		calculateDiv operand1, operand2, result, 0 
 		calculateDiv operand1, operand2, result, 32 
+		calculateDiv operand1, operand2, result, 0 
 
 		jmp %%endOfShuntingYard
 	
@@ -292,8 +295,8 @@ global calcularPuntos
 		popOperandFromStack operand2 
 		popOperandFromStack operand1
 
-		calculateMul operand1, operand2, result, 0 
-		calculateMul operand1, operand2, result, 32
+		calculateMul operand1, operand2, result, 32 
+		calculateMul operand1, operand2, result, 0
 
 		jmp %%endOfShuntingYard
 
@@ -301,8 +304,8 @@ global calcularPuntos
 		popOperandFromStack operand2 
 		popOperandFromStack operand1 
 
-		calculateResta operand1, operand2, result, 0 
-		calculateResta operand1, operand2, result, 32
+		calculateResta operand1, operand2, result, 32 
+		calculateResta operand1, operand2, result, 0
 
 		jmp %%endOfShuntingYard
 	
@@ -310,8 +313,8 @@ global calcularPuntos
 		popOperandFromStack operand2 
 		popOperandFromStack operand1 
 
-		calculateSum operand1, operand2, result, 0 
-		calculateSum operand1, operand2, result, 32
+		calculateSum operand1, operand2, result, 32 
+		calculateSum operand1, operand2, result, 0
 
 		jmp %%endOfShuntingYard
 	
@@ -359,7 +362,10 @@ global calcularPuntos
 	%%endOfShuntingYard:
 		inc %1 
 		cmp byte[%1], 0
-		jne %%shuntingYardBegin	
+		jne %%shuntingYardBegin
+
+		popOperandFromStack resultFinal
+		pop r12  
 
 %endmacro
 
@@ -478,7 +484,7 @@ global calcularPuntos
 	vmovupd ymm6, [%1+%4]
 	vmovupd ymm7, [%2+%4] 
 
-	vdivpd ymm5, ymm7, ymm6 
+	vdivpd ymm5, ymm6, ymm7 
 	vmovupd [%3], ymm5
 	pushToStack4 %3  
 
@@ -511,7 +517,7 @@ global calcularPuntos
 	vmovupd ymm7, [%1+%4]
 	vmovupd ymm6, [%2+%4] 
 
-	vsubpd ymm5, ymm6, ymm7 
+	vsubpd ymm5, ymm7, ymm6 
 	vmovupd [%3], ymm5
 	pushToStack4 %3  
 
@@ -533,7 +539,7 @@ pointsY dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
 charToken db "----------" , 0 
 
-number dq 0 
+number dq 0.0
 
 sinX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 sinY dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
@@ -547,8 +553,8 @@ lnY dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 operand1 dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 operand2 dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
-resultTemp dq 0.0, 0.0, 0.0, 0.0
-result dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+result dq 0.0, 0.0, 0.0, 0.0
+resultFinal dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
 section .text
 
