@@ -280,12 +280,39 @@ global calcularPuntos
 		jmp %%endOfShuntingYard
 
 	%%itIsDiv: 
+		popOperandFromStack operand2 
+		popOperandFromStack operand1 
+
+		calculateDiv operand1, operand2, result, 0 
+		calculateDiv operand1, operand2, result, 32 
+
 		jmp %%endOfShuntingYard
+	
 	%%itIsMul: 
+		popOperandFromStack operand2 
+		popOperandFromStack operand1
+
+		calculateMul operand1, operand2, result, 0 
+		calculateMul operand1, operand2, result, 32
+
 		jmp %%endOfShuntingYard
+
 	%%itIsResta: 
+		popOperandFromStack operand2 
+		popOperandFromStack operand1 
+
+		calculateResta operand1, operand2, result, 0 
+		calculateResta operand1, operand2, result, 32
+
 		jmp %%endOfShuntingYard
+	
 	%%itIsSum: 
+		popOperandFromStack operand2 
+		popOperandFromStack operand1 
+
+		calculateSum operand1, operand2, result, 0 
+		calculateSum operand1, operand2, result, 32
+
 		jmp %%endOfShuntingYard
 	
 	%%itIsAnX: 
@@ -349,6 +376,18 @@ global calcularPuntos
 
 %endmacro 
 
+%macro pushToStack4 1
+		
+	mov r15, 3 
+	
+	%%pushOperand: 
+		push qword[%1+r15*8]
+		dec r15 
+		cmp r15, -1 
+		jg %%pushOperand		
+
+%endmacro 
+
 %macro pushNumberToStack 1
 		
 	mov r15, 7 
@@ -363,7 +402,7 @@ global calcularPuntos
 
 
 ; %1 memory or register to pop  
-%macro popOperandToStack 1
+%macro popOperandFromStack 1
 	
 	xor r15, r15 
 	%%popOperand: 
@@ -430,6 +469,53 @@ global calcularPuntos
 		jmp %%calculateLn
 
 %endmacro
+;%1 operand1 
+;%2 operand2 
+;%3 result 
+;%4 increment 
+%macro calculateDiv 4
+	
+	vmovupd ymm6, [%1+%4]
+	vmovupd ymm7, [%2+%4] 
+
+	vdivpd ymm5, ymm7, ymm6 
+	vmovupd [%3], ymm5
+	pushToStack4 %3  
+
+%endmacro 
+
+%macro calculateMul 4
+	
+	vmovupd ymm7, [%1+%4]
+	vmovupd ymm6, [%2+%4] 
+
+	vmulpd ymm5, ymm7, ymm6 
+	vmovupd [%3], ymm5
+	pushToStack4 %3  
+
+%endmacro 
+
+%macro calculateSum 4
+	
+	vmovupd ymm7, [%1+%4]
+	vmovupd ymm6, [%2+%4] 
+
+	vaddpd ymm5, ymm7, ymm6 
+	vmovupd [%3], ymm5
+	pushToStack4 %3  
+
+%endmacro 
+
+%macro calculateResta 4
+	
+	vmovupd ymm7, [%1+%4]
+	vmovupd ymm6, [%2+%4] 
+
+	vsubpd ymm5, ymm6, ymm7 
+	vmovupd [%3], ymm5
+	pushToStack4 %3  
+
+%endmacro 
 
 section .data
 
@@ -457,6 +543,12 @@ cosY dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
 lnX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 lnY dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+operand1 dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+operand2 dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+resultTemp dq 0.0, 0.0, 0.0, 0.0
+result dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
 section .text
 
