@@ -287,16 +287,48 @@ global calcularPuntos
 		jmp %%endOfShuntingYard
 	%%itIsSum: 
 		jmp %%endOfShuntingYard
+	
 	%%itIsAnX: 
+		pushToStack pointsX
 		jmp %%endOfShuntingYard
 	%%itIsAnY: 
+		pushToStack pointsY
 		jmp %%endOfShuntingYard
-	%%checkLn: 
+	
+	%%checkLn:
+		cmp byte[charToken+4], 'x'
+		jne %%lnYPoints 
+		calculateLn pointsX, lnX, %%endOfShuntingYard
+		pushToStack lnX 
 		jmp %%endOfShuntingYard
+		%%lnYPoints: 
+			calculateLn pointsY, lnY, %%endOfShuntingYard
+			pushToStack lnY 
+		jmp %%endOfShuntingYard
+	
 	%%checkCos: 
+		cmp byte[charToken+4], 'x'
+		jne %%cosYPoints 
+		calculateCos pointsX, cosX, %%endOfShuntingYard
+		pushToStack cosX 
 		jmp %%endOfShuntingYard
+		%%cosYPoints: 
+			calculateCos pointsY, cosY, %%endOfShuntingYard
+			pushToStack cosY 
+		jmp %%endOfShuntingYard
+	
 	%%checkSen: 
+		cmp byte[charToken+4], 'x'
+		jne %%sinYPoints 
+		calculateSin pointsX, sinX, %%endOfShuntingYard
+		pushToStack sinX 
 		jmp %%endOfShuntingYard
+		%%sinYPoints: 
+			calculateSin pointsY, sinY, %%endOfShuntingYard
+			pushToStack sinY 
+		jmp %%endOfShuntingYard
+	
+
 	%%endOfShuntingYard:
 		inc %1 
 		cmp byte[%1], 0
@@ -340,6 +372,62 @@ global calcularPuntos
 		cmp r15, 8
 		jl %%popOperand 
 
+%endmacro
+
+; %1 pointsX or pointsY 
+; %2 cosX or CosY 
+; %3 label to jmp to 
+%macro calculateCos 3 
+	
+	mov r15, 7 
+	%%calculateCos:
+		cmp r15, -1 
+		je %3
+		fld qword[%1+r15*8]
+		fcos	
+		fstp qword[%2+r15*8]
+		dec r15 
+		jmp %%calculateCos
+
+%endmacro
+
+; %1 pointsX or pointsY 
+; %2 sinX or sinY 
+; %3 label to jmp to 
+%macro calculateSin 3 
+	
+	mov r15, 7 
+	%%calculateSin:
+		cmp r15, -1 
+		je %3
+		fld qword[%1+r15*8]
+		fsin	
+		fstp qword[%2+r15*8]
+		dec r15 
+		jmp %%calculateSin 
+
+%endmacro
+
+; %1 pointsX or pointsY 
+; %2 lnX or lnY 
+; %3 label to jmp to 
+%macro calculateLn 3 
+	
+	mov r15, 7 
+	%%calculateLn: 
+		cmp r15, -1 
+		je %3 
+		
+		fld1
+		fldl2e  
+		fdivp st1, st0 ; 1/log2(e) 
+		
+		fld qword[%1+r15*8]
+		fyl2x
+		
+		fstp qword[%2+r15*8]
+		dec r15 
+		jmp %%calculateLn
 
 %endmacro
 
@@ -360,6 +448,15 @@ pointsY dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 charToken db "----------" , 0 
 
 number dq 0 
+
+sinX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+sinY dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+cosX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+cosY dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+lnX dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+lnY dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
 section .text
 
