@@ -223,7 +223,6 @@ global calcularPuntos
 	%%shuntingYardBegin:
 		xor r15, r15 	
 		xor r14, r14 
-		push r12 
 	; for each token 
  
 		; limpiar el token 
@@ -365,8 +364,8 @@ global calcularPuntos
 		jne %%shuntingYardBegin
 
 		popOperandFromStack resultFinal
-		pop r12  
-
+		mov r12, rdi 
+		add r12, 24 
 %endmacro
 
 ; %1 memory or register to push 
