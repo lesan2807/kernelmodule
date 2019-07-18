@@ -33,7 +33,8 @@ global parser
 ; %3 register pointing to mem that contains the number
 ; %4 register pointing to mem where we want to move the number
 %macro readNumber 4
-
+	
+	xor rax, rax  
 	push r10
 	push r8
 
@@ -112,7 +113,7 @@ global parser
 	jne %%cos
 	mov byte [rcx], 's'
 	inc rcx
-	mov byte [rcx], 'e'
+	mov byte [rcx], 'i'
 	inc rcx
 	mov byte [rcx], 'n'
 	inc rcx
@@ -255,7 +256,6 @@ section .text
 
 parser:
 	pushPila
-	xor rax, rax 
 
 	; procesar intervalos
 	; ciclo
@@ -319,7 +319,11 @@ parser:
 	intervalosY:
 	mov r8, 3
 	revisarIntervalosY:
+		cmp byte [rdi], 0
+		je llenarCeros2
+
 		dec r8
+		
 		cmp byte [rdi], '['
 		jne errorSintaxis	; la cadena no empieza con '['
 
@@ -401,7 +405,8 @@ parser:
 		cmp byte [rsi], '('
 		jne errorSintaxis
 		inc rsi
-		
+
+		; OJO: REVISAR ESTO (¿PUEDO MOVER SOLO UN BYTE A UNA COSA DE 64 BITS?)
 		mov r15, 's'
 		push r15 		; 's' indica operador seno
 		inc r12
@@ -537,7 +542,6 @@ parser:
 
 	errorSintaxis:
 
-
 	;desalojo de pila
 	desalojo:
 		cmp r12, 0
@@ -551,7 +555,6 @@ parser:
 	mov rax, 10
 
 	finDeParsing:
-
 
 	mov byte [rcx], 0
 	

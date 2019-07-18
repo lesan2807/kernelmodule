@@ -26,6 +26,8 @@ global verificarErrores
 
 section .data 
 
+numeros db '0123456789', 0 
+
 section .text 
 
 ; int verificarErrores(char* range, char* function, double incremento )
@@ -66,40 +68,7 @@ verificarErrores:
 		hayError1: 
 			mov rax, 1 
 
-    error2: ; Verifica que haya una variable luego de 'sin', 'cos', 'ln
-    	xor r12, r12 ; index 
-
-    	recorreHileraCosSenLn: 
-    		mov r14b, byte[rsi+r12]
-    		inc r12 
-    		cmp r14b, 's'
-    		je checkCosSin 
-    		cmp r14b, 'c'
-    		je checkCosSin 
-    		cmp r14b, 'l'
-    		je checkLn 
-    		cmp r14b, 0 
-    		je error3 
-    		jmp recorreHileraCosSenLn
-
-    	checkLn: 
-    		add r12, 1
-    		cmp byte[rsi+r12], 'x'
-    		je recorreHileraCosSenLn 
-    		cmp byte[rsi+r12], 'y'
-    		je recorreHileraCosSenLn 	
-
-		checkCosSin: 
-			add r12, 2
-    		cmp byte[rsi+r12], 'x'
-    		je recorreHileraCosSenLn
-    		cmp byte[rsi+r12], 'y'
-    		je recorreHileraCosSenLn
-
-		hayError2: 
-			mov rax, 2 	
-
-    error3: ; Verifica que no haya */ de más en la función
+    error2: ; Verifica que no haya */ de más en la función
     	xor r12, r12 ; index 
 		xor r13, r13 ; cantidad de / y * en la function 
 
@@ -111,20 +80,118 @@ verificarErrores:
     		cmp r14b, '-'
     		je hayUnPorOEntre 
     		cmp r14b, 0 ; llega al final de la cadena ya termina de verificar este error y pasa al siguiente 
-    		je error2 
-    		jmp recorreHileraMasMenos
+    		je error3 
+    		jmp recorreHileraPorEntre
 
     	hayUnPorOEntre: 
     		inc r13 
     		cmp r13, 6 
-    		jg hayError3 
+    		jg hayError2 
     		jmp recorreHileraPorEntre
 
-		hayError3: 
-			mov rax, 3 	
+		hayError2: 
+			mov rax, 2 	
 
-    error4: ; Verifica que no haya dos * o / o + o - contiguos
-    	
+    error3: ; Verifica que no haya dos * o / o + o - contiguos
+
+    	xor r12, r12 ; index 
+    	xor r13, r13 ; temporalIndex 
+
+    	recorreHileraOperador: 
+    	mov r13, r12 
+    	mov r14b, byte[rsi+r12] 
+    	inc r12 
+    	cmp r14b, '*'
+    	je isOperator
+    	cmp r14b, '/'
+    	je isOperator
+    	cmp r14b, '+'
+    	je isOperator
+    	cmp r14b, '-'
+    	je isOperator
+    	cmp r14b, 0 
+    	je error4
+    	jmp recorreHileraOperador
+
+    	isOperator: 
+    		mov r14b, byte[rsi+r13-1] ; anterior al actual 
+    		cmp r14b, '*'
+    		je hayError3
+    		cmp r14b, '/'
+    		je hayError3
+    		cmp r14b, '+'
+    		je hayError3
+    		cmp r14b, '-'
+    		je hayError3 
+
+			mov r14b, byte[rsi+r13+1] ; posterior al actual 
+    		cmp r14b, '*'
+    		je hayError3
+    		cmp r14b, '/'
+    		je hayError3
+    		cmp r14b, '+'
+    		je hayError3
+    		cmp r14b, '-'
+    		je hayError3 
+
+    		jmp recorreHileraOperador
+
+    	hayError3: 
+    		mov rax, 3	
+
+    error4: ; Revisa que no haya variables diferentes a 'x' o 'y' 
+
+    	xor r12, r12 
+		recorreHileraXoY:
+			mov r14b, byte[rsi+r12]
+			inc r12
+			cmp r14b, 0
+			je error6
+
+			cmp r14b, '*'
+    		je recorreHileraXoY
+    		cmp r14b, '/'
+    		je recorreHileraXoY
+    		cmp r14b, '+'
+    		je recorreHileraXoY
+    		cmp r14b, '-'
+    		je recorreHileraXoY 
+
+    		checkIfConstante: 
+    			xor r9, r9 ; index = 0
+
+    			recorrerConstantes: 
+    				mov r10b, byte[numeros+r9]
+    				inc r9 
+    				cmp r14b, r10b 
+    				je recorreHileraXoY
+    				cmp r10b, 0 
+    				je checkIfOperando
+    				jmp recorrerConstantes
+
+    		checkIfOperando: ; check if sin, cos, ln, x or y 
+  
+    			cmp r14b, 's'
+    			add r12, 2 
+    			je recorreHileraXoY 
+    			cmp r14b, 'c'
+    			add r12, 2 
+    			je recorreHileraXoY 
+    			cmp r14b, 'l'
+    			inc r12 
+    			je recorreHileraXoY 
+    			cmp r14b, '('
+    			je recorreHileraXoY
+    			cmp r14b, ')'
+    			je recorreHileraXoY
+    			cmp r14b, 'x'
+    			je recorreHileraXoY
+    			cmp r14b, 'y'
+    			je recorreHileraXoY
+
+		hayError4:
+			mov rax, 4
+
 
     error5: 
 
@@ -133,23 +200,10 @@ verificarErrores:
     error7: 
 
     error8: 
-
-    error9: 
    
 fin: 
     popPila 
 	
-
-	
-
-	
-
-	
-
-	
-
-	; Revisa que no haya variables diferentes a 'x' o 'y'
-
 	; Verifica que no haya constantes de mas de 7 digitos
 
 	; Verifica que no haya más de 2 operadores por término
