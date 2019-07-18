@@ -364,6 +364,27 @@ global calcularPuntos
 		jne %%shuntingYardBegin
 
 		popOperandFromStack resultFinal
+
+		xor r11, r11 
+		mov r10, qword[count]
+	%%movToPoints: 	
+		
+		movsd xmm6, qword[resultFinal+r11*8]
+
+        cmp qword[pointsX+r11*8], 0 
+        je %%incForMovPoints
+        
+        movsd qword[rsi+r10*8], xmm6
+
+        inc r10  
+
+    %%incForMovPoints: 
+		inc r11 		
+		cmp r11, 8
+		jl %%movToPoints 
+
+		mov qword[count], r10 
+
 		mov r12, rdi 
 		add r12, 24 
 %endmacro
@@ -554,6 +575,8 @@ operand2 dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
 result dq 0.0, 0.0, 0.0, 0.0
 resultFinal dq 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+count dq 0 
 
 section .text
 
