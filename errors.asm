@@ -212,3 +212,4 @@ fin:
 
 	; verifica que no se pase de la cantidad de doubles máximo	
 
+	; Verifica que siempre venga al menos un rango para ‘x’

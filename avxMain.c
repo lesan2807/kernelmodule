@@ -12,7 +12,7 @@ int main(int argc, char const *argv[])
 	/* code */
 	double* points = (double*)calloc(100, sizeof(double)); 
 
-	char loQueRecibi[] = {"[0 1] [2 3] [4 5]#,sin(x)+x/300-25,0.1"};
+	char loQueRecibi[] = {"[0 1]#[0 1],y*y+x*x,0.1"};
 	
 	char* info = (char*)calloc(4096, sizeof(char)); 
 	char* range = (char*)calloc(2048, sizeof(char)); 
