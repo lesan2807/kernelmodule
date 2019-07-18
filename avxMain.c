@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 
+extern void calcularPuntos(char*, double*, double, size_t, char*); 
+extern int verificarErrores(char*, char*, double); 
+
+
 int main(int argc, char const *argv[])
 {
 	/* code */
@@ -9,12 +13,9 @@ int main(int argc, char const *argv[])
 
 	char funcion[] = {"[0 1] [2 3] [4 5],x*x+x/300-25,0.1"};
 	
-	char* info = (char*)calloc(2048, sizeof(char)); 
-
+	char* info = (char*)calloc(4096, sizeof(char)); 
 	char* range = (char*)calloc(2048, sizeof(char)); 
-
 	char* function = (char*)calloc(2048, sizeof(char)); 
-
 	char* incr = (char*)calloc(1024, sizeof(char)); 
 
 	int count = 0; 
@@ -36,7 +37,10 @@ int main(int argc, char const *argv[])
 
 	printf("%s %s %s\n", range, function, incr);
 
-	extern void calcularPuntos(char*, double*, double, size_t, char*); 
+
+	int a = verificarErrores(range, function, strtod(incr, NULL)); 
+
+	// vFunction 
 	calcularPuntos("0,1,2,3,4,5,0,0,0,0,0,0,x,x,*,x,300,/,+,25,-,", points, 0.100000000000000000000000000000000000000, strlen(funcion), funcion); 
 	
 	for(int i = 0; i < 30; ++i )
