@@ -129,17 +129,25 @@ static int dev_open(struct inode *inodep, struct file *filep){
 *  @param offset The offset if required
 */
 static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *offset){
+  char* info;
+  char* range;
+  char* function;
+  char* incr;
+  char* pch; 
+  int count; 
+  int error_count;
+  int b; 
 
   points = (double*)vzalloc(len); 
 
-  char* info = (char*)vzalloc(4096); 
-  char* range = (char*)vzalloc(2048); 
-  char* function = (char*)vzalloc(2048); 
-  char* incr = (char*)vzalloc(1024); 
+  info = (char*)vzalloc(4096); 
+  range = (char*)vzalloc(2048); 
+  function = (char*)vzalloc(2048); 
+  incr = (char*)vzalloc(1024); 
 
-  int count = 0; 
+  count = 0; 
 
-  char* pch; 
+
   
   while( (pch = strsep(&messageToSend, ",")) != NULL )
   {
@@ -152,8 +160,8 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
     ++count;
   } 
 
-  int error_count = verificarErrores(range, function, incr); 
-  int b = -1; 
+  error_count = verificarErrores(range, function, incr); 
+  b = -1; 
   if(error_count == 0)
     b = parser(range, function, incr, info); 
   else 
@@ -188,6 +196,7 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
 *  @param offset The offset if required
 */
 static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, loff_t *offset){
+  int i;
   printk(KERN_INFO "vFunctionDev: Received %s, %zu characters from the user\n", buffer,len);
 
   messageToSend = (char*) vmalloc (len);
@@ -196,7 +205,7 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
     return -1;
   }
   sizeMessageToSend = len;
-  int i = 0;
+  i = 0;
   for(;i<len;i++)
   {
     messageToSend[i] = buffer[i];
