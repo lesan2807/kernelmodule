@@ -40,13 +40,15 @@ int main(int argc, char const *argv[])
 
 
 	int a = verificarErrores(range, function, strtod(incr, NULL)); 
+	int b = -1; 
+	if(a == 0)
+		b = parser(range, function, incr, info); 
 
-	int b = parser(range, function, incr, info); 
-
-	printf("resultado: %s\nerror: %d\n", info, b);
+	printf("resultado: %s\nerror: %d\n", info, a);
 
 	// vFunction 
-	calcularPuntos(info, points, 0.1); 
+    if(b == 0)
+	    calcularPuntos(info, points, 0.1); 
 	
 	for(int i = 0; i < 30; ++i )
 	{
