@@ -157,17 +157,17 @@ verificarErrores:
     		cmp r14b, '-'
     		je recorreHileraXoY 
 
-    		checkIfConstante: 
+    		checkIfConstante1: 
     			xor r9, r9 ; index = 0
 
-    			recorrerConstantes: 
+    			recorrerConstantes1: 
     				mov r10b, byte[numeros+r9]
     				inc r9 
     				cmp r14b, r10b 
     				je recorreHileraXoY
     				cmp r10b, 0 
     				je checkIfOperando
-    				jmp recorrerConstantes
+    				jmp recorrerConstantes1
 
     		checkIfOperando: ; check if sin, cos, ln, x or y 
   
@@ -189,27 +189,113 @@ verificarErrores:
     			cmp r14b, 'y'
     			je recorreHileraXoY
 
+
+
 		hayError4:
 			mov rax, 4
 
 
-    error5: 
+    error5: ; Verifica que no haya constantes de mas de 7 digitos
+    	xor r12, r12 ; index 
+    	xor r13, r13 ; count = 0, cantidad de digitos
 
-    error6: 
+    	recorreHileraConst:
+    		mov r14b, byte[rsi+r12]
+    		inc r12 
+    		cmp r14b, 0
+    		je error6
 
-    error7: 
+    		checkIfConstante: 
+    			xor r9, r9 ; index = 0
 
-    error8: 
+    			recorrerConstantes: 
+    				mov r10b, byte[numeros+r9]
+    				inc r9 
+    				cmp r14b, '0'
+    				jb verificarError 
+    				cmp r14b, '9'
+    				ja verificarError
+					inc r13 
+    				cmp r10b, 0 
+    				je verificarError
+    				jmp recorrerConstantes
+
+			verificarError:
+
+				cmp r13, 7 
+				je hayError5 
+				jmp recorreHileraConst
+
+		hayError5:
+			mov rax, 5		
+
+
+    error6: ; Verifica que no haya más de 2 operadores (*/) por término
+
+    	xor r12, r12 ; index 
+    	xor r13, r13 ; count 
+
+    	recorreHilera2Op: 
+    		mov r14b, byte[rsi+r12]
+    		inc r12
+    		cmp r14b, '*'
+    		je esMulODiv 
+    		cmp r14b, '/'
+    		je esMulODiv
+    		cmp r14b, '+'
+    		je esSumoRes
+    		cmp r14b, '-'
+    		je esSumoRes
+    		cmp r14b, 0 
+    		je error7 
+    		jmp recorreHilera2Op
+
+    	esMulODiv:
+    		inc r13 
+    		cmp r13, 3
+    		je hayError6
+    		jmp recorreHilera2Op 
+
+    	esSumoRes: 
+    		xor r13, r13 
+    		jmp recorreHilera2Op	
+
+		hayError6:
+			mov rax, 6	
+
+    error7: ; Verifica que siempre venga al menos un rango para ‘x’
+    	xor r12, r12
+    	mov r12, 1 
+    verificarPrimerRango: 	
+    	mov r14b, byte[rdi+r12]
+    	cmp r14b, '0'
+		jb verificarPrimero 
+		cmp r14b, '9'
+		ja verificarPrimero 
+		inc r12 
+		cmp r14b, ']'
+		je fin 
+		jmp verificarPrimerRango
+
+	verificarPrimero:
+		cmp r14b, ' '
+		jne hayError7 
+		jmp verificarPrimerRango
+
+
+	hayError7:
+		mov rax, 7 	
+
    
 fin: 
     popPila 
 	
-	; Verifica que no haya constantes de mas de 7 digitos
+	
 
-	; Verifica que no haya más de 2 operadores por término
+	
 
-	; verifica los rangos estén bien escritos 
+	
 
-	; verifica que no se pase de la cantidad de doubles máximo	
+	
 
-	; Verifica que siempre venga al menos un rango para ‘x’
+	
