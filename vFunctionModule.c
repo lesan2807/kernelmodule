@@ -20,14 +20,14 @@ MODULE_VERSION("0.3");
 static struct class*  vFunctionClass  = NULL; ///< The device-driver class struct pointer
 static struct device* vFunctionDevice = NULL; ///< The device-driver device struct pointer
 extern void calcularPuntos(char*, double*, char*);
-int calcular (char* info, double* points, char* increment){
+int calcular(char* info, double* points, char* increment){
    
    printk(KERN_INFO "Calculating points...\n");
    calcularPuntos(info, points, increment); 
    printk (KERN_INFO "Points are calculate\n");
    return 0;
 }
-EXPORT_SYMBOL(calcular );
+EXPORT_SYMBOL(calcular);
 static int __init vFunction_init(void){
    printk(KERN_INFO "vFunction: Initializing the vFunction LKM\n");
    return 0;
