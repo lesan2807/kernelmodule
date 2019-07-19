@@ -6,17 +6,20 @@
 #include <linux/uaccess.h>          // Required for the copy to user function
 #include <linux/mutex.h>
 
+
+MODULE_LICENSE("GPL");
+
 #define  DEVICE_NAME "vFunctionDev"    ///< The device will appear at /dev/vFunctionDev using this value
-#define  CLASS_NAME  "decive"        ///< The device class -- this is a character device driver
+#define  CLASS_NAME  "device"        ///< The device class -- this is a character device driver
 MODULE_LICENSE("GPL");            ///< The license type -- this affects available functionality
-MODULE_VERSION("0.3");            ///< A version number to inform users
+MODULE_VERSION("1.0");            ///< A version number to inform users
 
 // Assembly functions 
-extern void calcularPuntos(char*, double*, double); 
-extern int verificarErrores(char*, char*, double); 
-
+extern void calcularPuntos(char*, double*, char*); 
+extern int verificarErrores(char*, char*, char*); 
+extern int parser(char*, char*, char*, char*); 
 // VFunction function 
-extern void calcular(char*, double*, double);
+extern void calcular(char*, double*, char*);
 
 static int    majorNumber;                  ///< Stores the device number -- determined automatically
 static int    numberOpens = 0;              ///< Counts the number of times the device is opened
@@ -24,6 +27,7 @@ static struct class*  vFunctionDevClass  = NULL; ///< The device-driver class st
 static struct device* vFunctionDevDevice = NULL; ///< The device-driver device struct pointer
 static char*  messageToSend = NULL;
 static double* points; 
+static size_t sizeMessageToSend; 
 
 static DEFINE_MUTEX(vFunctionDev_mutex);
 
@@ -126,18 +130,18 @@ static int dev_open(struct inode *inodep, struct file *filep){
 */
 static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *offset){
 
-  points* = (double*)calloc(len, sizeof(double)); 
+  points = (double*)vzalloc(len); 
 
-  char* info = (char*)calloc(4096, sizeof(char)); 
-  char* range = (char*)calloc(2048, sizeof(char)); 
-  char* function = (char*)calloc(2048, sizeof(char)); 
-  char* incr = (char*)calloc(1024, sizeof(char)); 
+  char* info = (char*)vzalloc(4096); 
+  char* range = (char*)vzalloc(2048); 
+  char* function = (char*)vzalloc(2048); 
+  char* incr = (char*)vzalloc(1024); 
 
   int count = 0; 
 
   char* pch; 
-  pch = strtok(messageToSend, ",");
-  while( pch != NULL )
+  
+  while( (pch = strsep(&messageToSend, ",")) != NULL )
   {
     if (count == 0)
       range = pch; 
@@ -146,25 +150,23 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
     else if( count == 2)
       incr = pch; 
     ++count;
-    pch = strtok (NULL, ",");
-
   } 
 
-  int error_count = verificarErrores(range, function, strtod(incr, NULL)); 
+  int error_count = verificarErrores(range, function, incr); 
   int b = -1; 
-  if(a == 0)
+  if(error_count == 0)
     b = parser(range, function, incr, info); 
   else 
     return error_count; 
   if(b == 0)
-    calcular(info, points, strod(incr, NULL)); 
+    calcular(info, points, incr); 
 
-  a = copy_to_user(buffer, (char*)points, len); 
+  error_count = copy_to_user(buffer, (char*)points, len); 
 
   if (error_count==0)
   {            // if true then have success
-    printk(KERN_INFO "vFunctionDev: Sent %d characters to the user\n", len);
-    return 0  // clear the position to the start and return 0
+    printk(KERN_INFO "vFunctionDev: Sent %zu characters to the user\n", len);
+    return 0;  // clear the position to the start and return 0
   }
   else 
   {

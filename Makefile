@@ -1,7 +1,7 @@
-obj-m += vFunctionModule.o
-obj-m += deviceDriver.o
-vFunctionModule-objs += vFunction.o 
-deviceDriver-objs += vFunctionDev.o errors.o
+obj-m += vFunctionMod.o
+obj-m += deviceDriverMod.o
+vFunctionMod-objs += vFunction.o vFunctionMod.o  
+deviceDriverMod-objs += vFunctionDev.o errors.o deviceDriver.o 
 
 
 all:

@@ -8,6 +8,8 @@
 #define  DEVICE_NAME "vFunction"    ///< The device will appear at /dev/vFunction using this value
 #define  CLASS_NAME  "points"        ///< The device class -- this is a character device driver
 
+#include <stdlib.h>
+
 MODULE_LICENSE("GPL");            ///< The license type -- this affects available functionality
 MODULE_VERSION("0.3");            
 
@@ -15,10 +17,10 @@ MODULE_VERSION("0.3");
 static struct class*  vFunctionClass  = NULL; ///< The device-driver class struct pointer
 static struct device* vFunctionDevice = NULL; ///< The device-driver device struct pointer
 extern void calcularPuntos(char*, double*, double);
-int calcular (char* info, double* points, double increment){
+int calcular (char* info, double* points, char* increment){
    
    printk(KERN_INFO "Calculating points...\n");
-   calcularPuntos(info, points, increment); 
+   calcularPuntos(info, points, strod(increment,NULL)); 
    printk (KERN_INFO "Points are calculate\n");
    return 0;
 }
