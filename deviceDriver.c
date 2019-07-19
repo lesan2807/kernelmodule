@@ -6,6 +6,9 @@
 #include <linux/uaccess.h>          // Required for the copy to user function
 #include <linux/mutex.h>
 
+#include <linux/module.h> /* Needed by all modules */
+#include <linux/kernel.h> /* Needed for KERN_INFO */
+#include <linux/init.h>   /* Needed for the macros */
 
 MODULE_LICENSE("GPL");
 

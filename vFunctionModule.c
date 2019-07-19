@@ -5,10 +5,13 @@
 #include <linux/fs.h>             // Header for the Linux file system support
 #include <linux/uaccess.h>        // Required for the copy to user function
 
+#include <linux/module.h>  /* Needed by all modules */
+#include <linux/kernel.h>  /* Needed for KERN_INFO */
+#include <linux/init.h>    /* Needed for the macros */
+
 #define  DEVICE_NAME "vFunction"    ///< The device will appear at /dev/vFunction using this value
 #define  CLASS_NAME  "points"        ///< The device class -- this is a character device driver
 
-#include <stdlib.h>
 
 MODULE_LICENSE("GPL");            ///< The license type -- this affects available functionality
 MODULE_VERSION("0.3");            
@@ -16,11 +19,11 @@ MODULE_VERSION("0.3");
  
 static struct class*  vFunctionClass  = NULL; ///< The device-driver class struct pointer
 static struct device* vFunctionDevice = NULL; ///< The device-driver device struct pointer
-extern void calcularPuntos(char*, double*, double);
+extern void calcularPuntos(char*, double*, char*);
 int calcular (char* info, double* points, char* increment){
    
    printk(KERN_INFO "Calculating points...\n");
-   calcularPuntos(info, points, strod(increment,NULL)); 
+   calcularPuntos(info, points, increment); 
    printk (KERN_INFO "Points are calculate\n");
    return 0;
 }
